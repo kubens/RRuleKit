@@ -57,7 +57,6 @@ public struct RecurrenceRule: Sendable {
 }
 
 // MARK: - RawRepresentable
-
 extension RecurrenceRule: RawRepresentable {
 
   /// A string representation of the recurrence rule in iCalendar format.
@@ -139,5 +138,31 @@ extension RecurrenceRule: RawRepresentable {
 
     guard let frequency else { return nil }
     self.frequency = frequency
+  }
+}
+
+// MARK: - Codable
+extension RecurrenceRule: Codable {
+
+  /// Decodes a `RecurrenceRule` from its iCalendar string representation.
+  ///
+  /// - Parameter decoder: The decoder to read data from.
+  public init(from decoder: any Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    let rawString = try container.decode(String.self)
+    guard let rule = RecurrenceRule(rawValue: rawString) else {
+      throw DecodingError.dataCorruptedError(
+        in: container,
+        debugDescription: "Invalid recurrence rule: \(rawString)")
+    }
+    self = rule
+  }
+
+  /// Encodes a `RecurrenceRule` to its iCalendar string representation.
+  ///
+  /// - Parameter encoder: The encoder to write data to.
+  public func encode(to encoder: any Encoder) throws {
+    var container = encoder.singleValueContainer()
+    try container.encode(self.rawValue)
   }
 }
