@@ -6,7 +6,7 @@
 //
 
 /// A rule which specifies how often an event should repeat in the future.
-public struct RecurrenceRule: Sendable {
+public struct RecurrenceRule: Equatable, Sendable {
 
   /// The frequency of the recurrence (e.g., daily, weekly, monthly, etc.).
   public var frequency: RecurrenceRule.Frequency
