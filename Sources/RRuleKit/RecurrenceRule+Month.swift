@@ -51,7 +51,6 @@ extension RecurrenceRule {
     /// Initializes a `Month` from its raw integer value.
     ///
     /// - Parameter rawValue: The integer representation of the month (1–12).
-    /// - Returns: An optional `Month` if the value matches one of the cases; otherwise, `nil`.
     public init?(_ rawValue: Int) {
       self.init(rawValue: rawValue)
     }
@@ -59,7 +58,6 @@ extension RecurrenceRule {
     /// Initializes a `Month` from a string representation of its raw value.
     ///
     /// - Parameter rawValue: A string representation of the month's integer value (e.g., `"1"`, `"12"`).
-    /// - Returns: An optional `Month` if the string represents a valid month; otherwise, `nil`.
     public init?(_ rawValue: String) {
       guard let value = Int(rawValue) else { return nil }
       self.init(rawValue: value)
@@ -68,7 +66,6 @@ extension RecurrenceRule {
     /// Initializes a `Month` from a substring representation of its raw value.
     ///
     /// - Parameter rawValue: A substring representation of the month's integer value.
-    /// - Returns: An optional `Month` if the substring represents a valid month; otherwise, `nil`.
     public init?(_ rawValue: Substring) {
       self.init(String(rawValue))
     }

@@ -78,7 +78,7 @@ extension RecurrenceRule {
 // MARK: - RawRepresentable
 extension RecurrenceRule.DayOfWeek: RawRepresentable {
 
-  /// A string representation of the `DayOfWeek` in iCalendar format.
+  /// A string representation of the `DayOfWeek` in iCalendar (RFC 5545) format.
   ///
   /// For example:
   /// - `"MO"` for every Monday.
@@ -89,7 +89,7 @@ extension RecurrenceRule.DayOfWeek: RawRepresentable {
     return "\(ordinal)\(weekday)"
   }
 
-  /// Creates a `DayOfWeek` from its iCalendar string representation.
+  /// Creates a `DayOfWeek` from its iCalendar (RFC 5545) string representation.
   ///
   /// - Parameter rawValue: A string in iCalendar format (e.g., `"MO"`, `"1MO"`, `"-1MO"`).
   public init?(rawValue: String) {

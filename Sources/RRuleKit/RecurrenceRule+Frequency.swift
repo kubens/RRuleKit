@@ -39,7 +39,6 @@ extension RecurrenceRule {
     /// Initializes a `Frequency` from a raw string value.
     ///
     /// - Parameter rawValue: A string representation of the frequency (e.g., `"DAILY"`, `"WEEKLY"`).
-    /// - Returns: An optional `Frequency` if the raw value matches one of the cases; otherwise, `nil`.
     public init?(_ rawValue: String) {
       self.init(rawValue: rawValue)
     }
@@ -47,7 +46,6 @@ extension RecurrenceRule {
     /// Initializes a `Frequency` from a raw substring value.
     ///
     /// - Parameter rawValue: A substring representation of the frequency.
-    /// - Returns: An optional `Frequency` if the raw value matches one of the cases; otherwise, `nil`.
     public init?(_ rawValue: Substring) {
       self.init(rawValue: String(rawValue))
     }

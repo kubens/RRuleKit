@@ -5,6 +5,8 @@
 //  Created by kubens.com on 01/01/2025.
 //
 
+import Foundation
+
 /// A rule which specifies how often an event should repeat in the future.
 public struct RecurrenceRule: Equatable, Sendable {
 
@@ -37,29 +39,80 @@ public struct RecurrenceRule: Equatable, Sendable {
   ///
   /// Positive values indicate specific days (e.g., `1` is the first day of the month), while negative
   /// values indicate counting backward (e.g., `-1` is the last day of the month).
+  /// - Note: This field is unused when `frequency` is `.weekly`.
   public var daysOfTheMonth: [Int] = []
 
   /// The weeks of the year during which the event occurs.
   ///
   /// Weeks are represented as integers, with `1` being the first week of the year.
+  /// - Note: This field is unused when `frequency` is other than `.yearly`.
   public var weeksOfTheYear: [Int] = []
 
   /// The days of the year on which the event occurs.
   ///
   /// Positive values indicate specific days (e.g., `1` is January 1st), while negative
   /// values indicate counting backward (e.g., `-1` is December 31st).
+  /// - Note: This field is unused when `frequency` is any of `.daily`, `.weekly`, or `.monthly`.
   public var daysOfTheYear: [Int] = []
 
   /// The positions within each interval to include in the recurrence.
   ///
   /// For example, `[1, -1]` specifies the first and last occurrences within the interval.
   public var setPositions: [Int] = []
+
+  // MARK: - Occurrences
+
+  /// Generates a sequence of occurrence dates based on the recurrence rule.
+  ///
+  /// This method computes all the dates defined by the recurrence rule that fall between
+  /// a given start date and an optional end date, up to a specified limit.
+  ///
+  /// - Parameters:
+  ///   - startDate: The date from which to start generating occurrences.
+  ///   - endDate: An optional end date. If provided, occurrences after this date will be excluded. Defaults to `nil`.
+  ///   - limit: The maximum number of dates to generate. Defaults to `366`.
+  /// - Returns: An array of `Date` values representing the occurrences.
+  public func occurrences(from startDate: Date, until endDate: Date? = nil, limit: Int = 366) -> [Date] {
+    guard limit > 0, var iterator = makeIterator(for: startDate) else { return [] }
+    var results: [Date] = []
+
+    while let nextDate = iterator.next() {
+      if let endDate, nextDate > endDate { break }
+      results.append(nextDate)
+
+      if results.count >= limit {
+        break
+      }
+    }
+
+    return results
+  }
+
+  /// Generates occurrences of dates that fall within a specified range.
+  ///
+  /// This method computes all the dates defined by the recurrence rule that fall
+  /// within the bounds of the provided date range.
+  ///
+  /// - Parameter range: A `ClosedRange<Date>` representing the start and end dates for the range.
+  /// - Returns: An array of `Date` values representing the occurrences within the range.
+  public func occurences(in range: ClosedRange<Date>) -> [Date] {
+    return occurrences(from: range.lowerBound, until: range.upperBound)
+  }
+
+  // MARK: Helpers
+
+  private func makeIterator(for startDate: Date) -> (any RecurrenceRuleIterator)? {
+    switch frequency {
+    case .weekly: WeeklyIterator(rrule: self, from: startDate, in: .current)
+    default: nil
+    }
+  }
 }
 
 // MARK: - RawRepresentable
 extension RecurrenceRule: RawRepresentable {
 
-  /// A string representation of the recurrence rule in iCalendar format.
+  /// A string representation of the recurrence rule in iCalendar (RFC 5545) format.
   ///
   /// For example: `"FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE,FR"`.
   public var rawValue: String {
@@ -124,8 +177,8 @@ extension RecurrenceRule: RawRepresentable {
       switch key {
       case "FREQ": frequency = RecurrenceRule.Frequency(value)
       case "INTERVAL": interval = Int(value) ?? 1
-      case "COUNT": end = RecurrenceRule.End.afterOccurrences(value) ?? .never
-      case "UNTIL": end = RecurrenceRule.End.afterDate(value) ?? .never
+      case "COUNT": end = .afterOccurrences(value) ?? .never
+      case "UNTIL": end = .afterDate(value) ?? .never
       case "BYDAY": daysOfTheWeek = value.split(separator: ",").compactMap({ RecurrenceRule.DayOfWeek($0) })
       case "BYMONTH": monthsOfTheYear = value.split(separator: ",").compactMap({ RecurrenceRule.Month($0) })
       case "BYMONTHDAY": daysOfTheMonth = value.split(separator: ",").compactMap({ Int($0) })
@@ -144,7 +197,7 @@ extension RecurrenceRule: RawRepresentable {
 // MARK: - Codable
 extension RecurrenceRule: Codable {
 
-  /// Decodes a `RecurrenceRule` from its iCalendar string representation.
+  /// Decodes a `RecurrenceRule` from its iCalendar (RFC 5545) string representation.
   ///
   /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: any Decoder) throws {
@@ -158,7 +211,7 @@ extension RecurrenceRule: Codable {
     self = rule
   }
 
-  /// Encodes a `RecurrenceRule` to its iCalendar string representation.
+  /// Encodes a `RecurrenceRule` to its iCalendar (RFC 5545) string representation.
   ///
   /// - Parameter encoder: The encoder to write data to.
   public func encode(to encoder: any Encoder) throws {
