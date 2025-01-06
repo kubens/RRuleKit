@@ -1,5 +1,5 @@
 //
-//  RecurrenceRule+Weekday.swift
+//  RRule+Weekday.swift
 //  RRuleKit
 //
 //  Created by kubens.com on 01/01/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension RecurrenceRule {
+extension RRule {
 
   /// Represents the days of the week for a recurrence rule.
   ///
@@ -115,7 +115,7 @@ extension RecurrenceRule {
     /// Example:
     /// ```swift
     /// let today = Date()
-    /// if let weekday = RecurrenceRule.Weekday(today) {
+    /// if let weekday = RRule.Weekday(today) {
     ///     print("Today is \(weekday)")
     /// }
     /// ```

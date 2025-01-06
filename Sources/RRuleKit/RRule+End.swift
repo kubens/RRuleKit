@@ -1,5 +1,5 @@
 //
-//  RecurrenceRule+End.swift
+//  RRule+End.swift
 //  RRuleKit
 //
 //  Created by kubens.com on 01/01/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension RecurrenceRule {
+extension RRule {
 
   /// Specifies when a recurring event should stop recurring.
   ///
@@ -21,10 +21,10 @@ extension RecurrenceRule {
     ///
     /// Example:
     /// ```swift
-    /// let end = RecurrenceRule.End.never
+    /// let end = RRule.End.never
     /// ```
-    public static var never: RecurrenceRule.End {
-      RecurrenceRule.End()
+    public static var never: RRule.End {
+      RRule.End()
     }
 
     /// Creates an `End` instance that stops the recurrence after a specified number of occurrences.
@@ -34,10 +34,10 @@ extension RecurrenceRule {
     ///
     /// Example:
     /// ```swift
-    /// let end = RecurrenceRule.End.afterOccurrences(10) // Stops after 10 occurrences.
+    /// let end = RRule.End.afterOccurrences(10) // Stops after 10 occurrences.
     /// ```
-    public static func afterOccurrences(_ count: Int) -> RecurrenceRule.End {
-      RecurrenceRule.End(occurrences: count)
+    public static func afterOccurrences(_ count: Int) -> RRule.End {
+      RRule.End(occurrences: count)
     }
 
     /// Creates an `End` instance that stops the recurrence after a specified date.
@@ -47,17 +47,17 @@ extension RecurrenceRule {
     ///
     /// Example:
     /// ```swift
-    /// let end = RecurrenceRule.End.afterDate(Date()) // Stops after the current date.
+    /// let end = RRule.End.afterDate(Date()) // Stops after the current date.
     /// ```
-    public static func afterDate(_ date: Date) -> RecurrenceRule.End {
-      RecurrenceRule.End(date: date)
+    public static func afterDate(_ date: Date) -> RRule.End {
+      RRule.End(date: date)
     }
 
     /// Creates an `End` instance from a raw string representing the number of occurrences.
     ///
     /// - Parameter rawCount: A string representation of the number of occurrences.
     /// - Returns: An optional `End` instance if the string is a valid number.
-    public static func afterOccurrences(_ rawCount: String) -> RecurrenceRule.End? {
+    public static func afterOccurrences(_ rawCount: String) -> RRule.End? {
       guard let count = Int(rawCount) else { return nil }
       return .afterOccurrences(count)
     }
@@ -66,7 +66,7 @@ extension RecurrenceRule {
     ///
     /// - Parameter rawCount: A substring representation of the number of occurrences.
     /// - Returns: An optional `End` instance if the substring is a valid number.
-    public static func afterOccurrences(_ rawCount: Substring) -> RecurrenceRule.End? {
+    public static func afterOccurrences(_ rawCount: Substring) -> RRule.End? {
       return .afterOccurrences(String(rawCount))
     }
 
@@ -74,7 +74,7 @@ extension RecurrenceRule {
     ///
     /// - Parameter rawDate: A string representation of the date in ISO 8601 format.
     /// - Returns: An optional `End` instance if the string is a valid date.
-    public static func afterDate(_ rawDate: String) -> RecurrenceRule.End? {
+    public static func afterDate(_ rawDate: String) -> RRule.End? {
       let isoFormatter = ISO8601DateFormatter()
       guard let date = isoFormatter.date(from: rawDate) else { return nil }
       return .afterDate(date)
@@ -84,7 +84,7 @@ extension RecurrenceRule {
     ///
     /// - Parameter rawDate: A substring representation of the date in ISO 8601 format.
     /// - Returns: An optional `End` instance if the substring is a valid date.
-    public static func afterDate(_ rawDate: Substring) -> RecurrenceRule.End? {
+    public static func afterDate(_ rawDate: Substring) -> RRule.End? {
       return .afterDate(String(rawDate))
     }
 

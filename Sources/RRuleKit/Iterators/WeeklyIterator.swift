@@ -15,7 +15,7 @@ import Foundation
 ///
 /// This iterator is designed to work seamlessly with the `IteratorProtocol`, allowing iteration
 /// over dates in a weekly recurrence pattern.
-public struct WeeklyIterator: RecurrenceRuleIterator {
+public struct WeeklyIterator: RRuleIterator {
 
   /// The calendar used for date calculations.
   public let calendar: Calendar
@@ -24,7 +24,7 @@ public struct WeeklyIterator: RecurrenceRuleIterator {
   public let interval: Int
 
   /// The condition that determines when the recurrence ends.
-  public let recurrenceEnd: RecurrenceRule.End
+  public let recurrenceEnd: RRule.End
 
   /// Filters applied to determine if a date satisfies the recurrence rule.
   ///
@@ -39,21 +39,21 @@ public struct WeeklyIterator: RecurrenceRuleIterator {
   /// The number of occurrences generated so far.
   private var occurencesCount: Int
 
-  /// Creates a new `WeeklyIterator` from a `RecurrenceRule`.
+  /// Creates a new `WeeklyIterator` from a `RRule`.
   ///
   /// This initializer only succeeds if the frequency of the recurrence rule is `.weekly`.
   ///
   /// - Parameters:
-  ///   - rrule: The `RecurrenceRule` to use for the iteration.
+  ///   - rrule: The `RRule` to use for the iteration.
   ///   - startDate: The starting date for the iteration. Defaults to the current date.
   ///   - calendar: The calendar to use for date calculations. Defaults to `.current`.
-  public init?(rrule: RecurrenceRule, from startDate: Date = .now, in calendar: Calendar = .current) {
+  public init?(rrule: RRule, from startDate: Date = .now, in calendar: Calendar = .current) {
     guard rrule.frequency == .weekly else { return nil }
     var filters: [any Filter] = []
 
     if rrule.daysOfTheWeek.count > 0 {
       filters.append(ByWeekdayFilter(daysOfTheWeek: rrule.daysOfTheWeek, useOrdinal: false))
-    } else if let weekday = RecurrenceRule.Weekday(startDate, in: calendar) {
+    } else if let weekday = RRule.Weekday(startDate, in: calendar) {
       filters.append(ByWeekdayFilter(daysOfTheWeek: [.every(weekday: weekday)], useOrdinal: false))
     } else {
       return nil

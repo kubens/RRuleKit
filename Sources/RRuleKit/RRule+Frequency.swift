@@ -1,11 +1,11 @@
 //
-//  RecurrenceRule+Frequency.swift
+//  RRule+Frequency.swift
 //  RRuleKit
 //
 //  Created by kubens.com on 01/01/2025.
 //
 
-extension RecurrenceRule {
+extension RRule {
 
   /// Represents the frequency of a recurrence rule.
   ///

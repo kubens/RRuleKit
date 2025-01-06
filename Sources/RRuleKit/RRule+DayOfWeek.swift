@@ -1,5 +1,5 @@
 //
-//  RecurrenceRule+DayOfWeek.swift
+//  RRule+DayOfWeek.swift
 //  RRuleKit
 //
 //  Created by kubens.com on 01/01/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension RecurrenceRule {
+extension RRule {
 
   /// Represents a day of the week with an optional ordinal modifier.
   ///
@@ -22,24 +22,24 @@ extension RecurrenceRule {
     ///
     /// - Parameter weekday: The weekday to be included in the recurrence.
     /// - Returns: A `DayOfWeek` instance.
-    public static func every(weekday: RecurrenceRule.Weekday) -> DayOfWeek {
-      RecurrenceRule.DayOfWeek(ordinal: nil, weekday: weekday)
+    public static func every(weekday: RRule.Weekday) -> DayOfWeek {
+      RRule.DayOfWeek(ordinal: nil, weekday: weekday)
     }
 
     /// Creates a `DayOfWeek` representing the first occurrence of the specified weekday in the interval.
     ///
     /// - Parameter weekday: The weekday to be included in the recurrence.
     /// - Returns: A `DayOfWeek` instance.
-    public static func first(weekday: RecurrenceRule.Weekday) -> DayOfWeek {
-      RecurrenceRule.DayOfWeek(ordinal: 1, weekday: weekday)
+    public static func first(weekday: RRule.Weekday) -> DayOfWeek {
+      RRule.DayOfWeek(ordinal: 1, weekday: weekday)
     }
 
     /// Creates a `DayOfWeek` representing the last occurrence of the specified weekday in the interval.
     ///
     /// - Parameter weekday: The weekday to be included in the recurrence.
     /// - Returns: A `DayOfWeek` instance.
-    public static func last(weekday: RecurrenceRule.Weekday) -> DayOfWeek {
-      RecurrenceRule.DayOfWeek(ordinal: -1, weekday: weekday)
+    public static func last(weekday: RRule.Weekday) -> DayOfWeek {
+      RRule.DayOfWeek(ordinal: -1, weekday: weekday)
     }
 
     /// Creates a `DayOfWeek` representing the nth occurrence of the specified weekday in the interval.
@@ -48,8 +48,8 @@ extension RecurrenceRule {
     ///   - ordinal: The nth occurrence (e.g., `1` for the first, `-1` for the last).
     ///   - weekday: The weekday to be included in the recurrence.
     /// - Returns: A `DayOfWeek` instance.
-    public static func nth(_ ordinal: Int, weekday: RecurrenceRule.Weekday) -> DayOfWeek {
-      RecurrenceRule.DayOfWeek(ordinal: ordinal, weekday: weekday)
+    public static func nth(_ ordinal: Int, weekday: RRule.Weekday) -> DayOfWeek {
+      RRule.DayOfWeek(ordinal: ordinal, weekday: weekday)
     }
 
     /// The ordinal modifier indicating which occurrence of the weekday to include.
@@ -61,14 +61,14 @@ extension RecurrenceRule {
     public var ordinal: Int?
 
     /// The day of the week being represented.
-    public var weekday: RecurrenceRule.Weekday
+    public var weekday: RRule.Weekday
 
     /// Creates a new `DayOfWeek` with the specified ordinal and weekday.
     ///
     /// - Parameters:
     ///   - ordinal: The ordinal modifier (or `nil` for every occurrence).
     ///   - weekday: The day of the week to include in the recurrence.
-    private init(ordinal: Int? = nil, weekday: RecurrenceRule.Weekday) {
+    private init(ordinal: Int? = nil, weekday: RRule.Weekday) {
       self.ordinal = ordinal
       self.weekday = weekday
     }
@@ -76,7 +76,7 @@ extension RecurrenceRule {
 }
 
 // MARK: - RawRepresentable
-extension RecurrenceRule.DayOfWeek: RawRepresentable {
+extension RRule.DayOfWeek: RawRepresentable {
 
   /// A string representation of the `DayOfWeek` in iCalendar (RFC 5545) format.
   ///
@@ -100,7 +100,7 @@ extension RecurrenceRule.DayOfWeek: RawRepresentable {
 
     if
       let range = Range(match.range(at: 2), in: rawValue),
-      let weekday = RecurrenceRule.Weekday(rawValue[range])
+      let weekday = RRule.Weekday(rawValue[range])
     {
       self.weekday = weekday
     } else {

@@ -1,5 +1,5 @@
 //
-//  RecurrenceRule.swift
+//  RRule.swift
 //  RRuleKit
 //
 //  Created by kubens.com on 01/01/2025.
@@ -8,10 +8,10 @@
 import Foundation
 
 /// A rule which specifies how often an event should repeat in the future.
-public struct RecurrenceRule: Equatable, Sendable {
+public struct RRule: Equatable, Sendable {
 
   /// The frequency of the recurrence (e.g., daily, weekly, monthly, etc.).
-  public var frequency: RecurrenceRule.Frequency
+  public var frequency: RRule.Frequency
 
   /// The interval at which the recurrence repeats.
   ///
@@ -25,15 +25,15 @@ public struct RecurrenceRule: Equatable, Sendable {
   /// This can specify a fixed number of occurrences, a specific date, or no end at all.
   ///
   /// - Default: `.never`
-  public var end: RecurrenceRule.End = .never
+  public var end: RRule.End = .never
 
   /// The days of the week on which the event occurs.
-  public var daysOfTheWeek: [RecurrenceRule.DayOfWeek] = []
+  public var daysOfTheWeek: [RRule.DayOfWeek] = []
 
   /// The months of the year in which the event occurs.
   ///
   /// Months are represented as integers, where `1` is January, `2` is February, and so on.
-  public var monthsOfTheYear: [RecurrenceRule.Month] = []
+  public var monthsOfTheYear: [RRule.Month] = []
 
   /// The days of the month on which the event occurs.
   ///
@@ -101,7 +101,7 @@ public struct RecurrenceRule: Equatable, Sendable {
 
   // MARK: Helpers
 
-  private func makeIterator(for startDate: Date) -> (any RecurrenceRuleIterator)? {
+  private func makeIterator(for startDate: Date) -> (any RRuleIterator)? {
     switch frequency {
     case .weekly: WeeklyIterator(rrule: self, from: startDate, in: .current)
     default: nil
@@ -110,7 +110,7 @@ public struct RecurrenceRule: Equatable, Sendable {
 }
 
 // MARK: - RawRepresentable
-extension RecurrenceRule: RawRepresentable {
+extension RRule: RawRepresentable {
 
   /// A string representation of the recurrence rule in iCalendar (RFC 5545) format.
   ///
@@ -161,12 +161,12 @@ extension RecurrenceRule: RawRepresentable {
     return components.joined(separator: ";")
   }
 
-  /// Initializes a `RecurrenceRule` from its string representation.
+  /// Initializes a `RRule` from its string representation.
   ///
   /// - Parameter rawValue: A string in iCalendar format.
   public init?(rawValue: String) {
     let components = rawValue.split(separator: ";")
-    var frequency: RecurrenceRule.Frequency?
+    var frequency: RRule.Frequency?
 
     for component in components {
       let pair = component.split(separator: "=")
@@ -175,12 +175,12 @@ extension RecurrenceRule: RawRepresentable {
       let value = pair[1]
 
       switch key {
-      case "FREQ": frequency = RecurrenceRule.Frequency(value)
+      case "FREQ": frequency = RRule.Frequency(value)
       case "INTERVAL": interval = Int(value) ?? 1
       case "COUNT": end = .afterOccurrences(value) ?? .never
       case "UNTIL": end = .afterDate(value) ?? .never
-      case "BYDAY": daysOfTheWeek = value.split(separator: ",").compactMap({ RecurrenceRule.DayOfWeek($0) })
-      case "BYMONTH": monthsOfTheYear = value.split(separator: ",").compactMap({ RecurrenceRule.Month($0) })
+      case "BYDAY": daysOfTheWeek = value.split(separator: ",").compactMap({ RRule.DayOfWeek($0) })
+      case "BYMONTH": monthsOfTheYear = value.split(separator: ",").compactMap({ RRule.Month($0) })
       case "BYMONTHDAY": daysOfTheMonth = value.split(separator: ",").compactMap({ Int($0) })
       case "BYWEEKNO": weeksOfTheYear = value.split(separator: ",").compactMap({ Int($0) })
       case "BYYEARDAY": daysOfTheYear = value.split(separator: ",").compactMap({ Int($0) })
@@ -195,15 +195,15 @@ extension RecurrenceRule: RawRepresentable {
 }
 
 // MARK: - Codable
-extension RecurrenceRule: Codable {
+extension RRule: Codable {
 
-  /// Decodes a `RecurrenceRule` from its iCalendar (RFC 5545) string representation.
+  /// Decodes a `RRule` from its iCalendar (RFC 5545) string representation.
   ///
   /// - Parameter decoder: The decoder to read data from.
   public init(from decoder: any Decoder) throws {
     let container = try decoder.singleValueContainer()
     let rawString = try container.decode(String.self)
-    guard let rule = RecurrenceRule(rawValue: rawString) else {
+    guard let rule = RRule(rawValue: rawString) else {
       throw DecodingError.dataCorruptedError(
         in: container,
         debugDescription: "Invalid recurrence rule: \(rawString)")
@@ -211,7 +211,7 @@ extension RecurrenceRule: Codable {
     self = rule
   }
 
-  /// Encodes a `RecurrenceRule` to its iCalendar (RFC 5545) string representation.
+  /// Encodes a `RRule` to its iCalendar (RFC 5545) string representation.
   ///
   /// - Parameter encoder: The encoder to write data to.
   public func encode(to encoder: any Encoder) throws {

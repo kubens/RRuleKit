@@ -21,7 +21,7 @@ public struct ByWeekdayFilter: Filter {
   ///
   /// Each `DayOfWeek` specifies a day (e.g., Monday, Tuesday) and may include an ordinal
   /// (e.g., the first or last occurrence of the day in a month).
-  public let daysOfTheWeek: [RecurrenceRule.DayOfWeek]
+  public let daysOfTheWeek: [RRule.DayOfWeek]
 
   /// Indicates whether ordinal matching should be used.
   ///
@@ -36,7 +36,7 @@ public struct ByWeekdayFilter: Filter {
   /// - Parameters:
   ///   - daysOfTheWeek: An array of `DayOfWeek` to match against.
   ///   - useOrdinal: Whether to consider ordinal positions in the matching process. Defaults to `true`.
-  public init(daysOfTheWeek: [RecurrenceRule.DayOfWeek], useOrdinal: Bool = true) {
+  public init(daysOfTheWeek: [RRule.DayOfWeek], useOrdinal: Bool = true) {
     self.daysOfTheWeek = daysOfTheWeek
     self.useOrdinal = useOrdinal
   }
@@ -51,7 +51,7 @@ public struct ByWeekdayFilter: Filter {
   ///   - calendar: The `Calendar` to use for date calculations.
   /// - Returns: `true` if the date matches the filter's criteria; otherwise, `false`.
   public func matches(date: Date, in calendar: Calendar) -> Bool {
-    guard let weekday = RecurrenceRule.Weekday(date, in: calendar) else { return false }
+    guard let weekday = RRule.Weekday(date, in: calendar) else { return false }
     let weekOfMonth = calendar.component(.weekOfMonth, from: date)
     let weeksInMonth = calendar.range(of: .weekOfMonth, in: .month, for: date)?.count ?? 0
     let reversedWeekOfMonth = -1 * (weeksInMonth - weekOfMonth + 1)
