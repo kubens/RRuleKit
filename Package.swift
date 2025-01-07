@@ -12,12 +12,21 @@ let package = Package(
       name: "RRuleKit",
       targets: ["RRuleKit"]
     ),
+    .library(
+      name: "RRuleKitUI",
+      targets: ["RRuleKitUI"]
+    )
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
     // Targets can depend on other targets in this package and products from dependencies.
     .target(
-      name: "RRuleKit"),
+      name: "RRuleKit"
+    ),
+    .target(
+      name: "RRuleKitUI",
+      dependencies: ["RRuleKit"]
+    ),
     .testTarget(
       name: "RRuleKitTests",
       dependencies: ["RRuleKit"]
