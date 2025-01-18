@@ -771,3 +771,47 @@ extension RecurrenceRuleRFC5545FormatStyle: ParseStrategy {
     return CocoaError(CocoaError.formatting, userInfo: [NSDebugDescriptionErrorKey: errStr])
   }
 }
+
+// MARK: - ParseableFormatStyle
+
+extension RecurrenceRuleRFC5545FormatStyle: ParseableFormatStyle {
+
+  public var parseStrategy: Self {
+    self
+  }
+}
+
+// MARK: -
+
+public extension FormatStyle where Self == RecurrenceRuleRFC5545FormatStyle {
+
+  static var rfc5545: Self {
+    .init(calendar: .current)
+  }
+
+  static func rfc5545(calendar: Calendar) -> Self {
+    .init(calendar: calendar)
+  }
+}
+
+public extension ParseStrategy where Self == RecurrenceRuleRFC5545FormatStyle {
+
+  static var rfc5545: Self {
+    .init(calendar: .current)
+  }
+
+  static func rfc5545(calendar: Calendar) -> Self {
+    .init(calendar: calendar)
+  }
+}
+
+public extension ParseableFormatStyle where Self == RecurrenceRuleRFC5545FormatStyle {
+
+  static var rfc5545: Self {
+    .init(calendar: .current)
+  }
+  
+  static func rfc5545(calendar: Calendar) -> Self {
+    .init(calendar: calendar)
+  }
+}
