@@ -23,6 +23,282 @@ public struct RecurrenceRuleRFC5545FormatStyle: Sendable {
   }
 }
 
+// MARK: - FormatStyle
+
+extension RecurrenceRuleRFC5545FormatStyle: FormatStyle {
+
+  /// Formats a `RecurrenceRule` into an RFC 5545 string representation.
+  ///
+  /// - Parameter value: The `RecurrenceRule` to format.
+  /// - Returns: A string representation of the rule in RFC 5545 format.
+  public func format(_ value: RecurrenceRule) -> String {
+    let estimatedCapacity = 128 // Estimated initial buffer size
+    var buffer = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: estimatedCapacity)
+    defer { buffer.deallocate() } // Ensure the buffer is deallocated after use
+
+    let lenght = format(value, into: &buffer)
+    return String(decoding: buffer[..<lenght], as: UTF8.self)
+  }
+
+  /// Formats a `RecurrenceRule` into a pre-allocated buffer in RFC 5545 format.
+  ///
+  /// - Parameters:
+  ///   - rrule: The `RecurrenceRule` to format.
+  ///   - buffer: The mutable buffer to write the formatted rule into.
+  /// - Returns: The number of bytes written to the buffer.
+  package func format(_ rrule: RecurrenceRule, into buffer: inout UnsafeMutableBufferPointer<UInt8>) -> Int {
+    // Use the Gregorian calendar for compliance with RFC 5545
+    let gregorianCalendar: Calendar = {
+      guard calendar.identifier != .gregorian else { return calendar }
+      var calendar = Calendar(identifier: .gregorian)
+      calendar.timeZone = self.calendar.timeZone
+
+      return calendar
+    }()
+
+    // Tracks the current write position in the buffer
+    var index = 0
+
+    func ensureCapacity(_ required: Int) {
+      guard required > buffer.count else { return }
+
+      let newCapacity = max(required, buffer.count * 2)
+      let newBuffer = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: newCapacity)
+
+      newBuffer.baseAddress?.initialize(from: buffer.baseAddress!, count: index)
+      buffer.deallocate()
+      buffer = newBuffer
+    }
+
+    // Helper to append a single byte
+    func append(_ byte: UInt8) {
+      ensureCapacity(index + 1)
+      buffer[index] = byte
+      index += 1
+    }
+
+    // Helper to append a collection of bytes
+    func append(_ bytes: some Collection<UInt8>) {
+      ensureCapacity(index + bytes.count)
+      for byte in bytes {
+        append(byte)
+      }
+    }
+
+    // Helper to append an integer with optional zero-padding
+    func append(_ value: Int, zeroPad: Int = 0) {
+      let asciiZero = UInt8(ascii: "0")
+      var remainingPadding = zeroPad
+      var value = value
+      var digits: [UInt8] = []
+
+      // Handle negative values
+      if value < 0 {
+        append(UInt8(ascii: "-"))
+        value = abs(value)
+      }
+
+      // Extract digits from the integer
+      repeat {
+        digits.append(asciiZero + UInt8(value % 10))
+        value /= 10
+      } while value > 0
+
+      // Add leading zeroes for padding
+      while digits.count < remainingPadding {
+        append(asciiZero)
+        remainingPadding -= 1
+      }
+
+      // Append digits in reverse order to form the number
+      for digit in digits.reversed() {
+        append(digit)
+      }
+    }
+
+    // Helper to append a collection of integers
+    func append(_ values: some Collection<Int>) {
+      for (index, value) in values.enumerated() {
+        if index > 0 {
+          append(UInt8(ascii: ","))
+        }
+
+        append(value)
+      }
+    }
+
+    // Helper to append a `Date` in RFC 5545 format
+    func append(_ date: Date) {
+      // Extract date components
+      let components = gregorianCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+      guard let year = components.year,
+            let month = components.month,
+            let day = components.day else {
+        return // Exit if year, month, or day is missing
+      }
+
+      let isUTC = gregorianCalendar.timeZone.secondsFromGMT() == 0
+      let isDateTime = (components.hour ?? 0) != 0 || (components.minute ?? 0) != 0 || (components.second ?? 0) != 0
+
+      // Add TZID prefix for DATE-TIME if not in UTC
+      if isDateTime && !isUTC {
+        append("TZID=".utf8)
+        append(calendar.timeZone.identifier.utf8)
+        append(":".utf8)
+      }
+
+      // Append the date components
+      append(year, zeroPad: 4)
+      append(month, zeroPad: 2)
+      append(day, zeroPad: 2)
+
+      // Append time components if this is a DATE-TIME
+      if isDateTime {
+        append("T".utf8)
+        append(components.hour!, zeroPad: 2)
+        append(components.minute!, zeroPad: 2)
+        append(components.second!, zeroPad: 2)
+
+        // Add UTC suffix if the time is in UTC
+        if isUTC {
+          append(UInt8(ascii: "Z"))
+        }
+      }
+    }
+
+    // Helper to append a `Locale.Weekday` in RFC 5545 format
+    func append(_ weekday: Locale.Weekday) {
+      switch weekday {
+      case .monday:    append("MO".utf8)
+      case .tuesday:   append("TU".utf8)
+      case .wednesday: append("WE".utf8)
+      case .thursday:  append("TH".utf8)
+      case .friday:    append("FR".utf8)
+      case .saturday:  append("SA".utf8)
+      case .sunday:    append("SU".utf8)
+      @unknown default: break // Safeguard against future unknown cases
+      }
+    }
+
+    // Helper to append a collection of `RecurrenceRule.Weekday` objects
+    func append(_ weekdays: some Collection<RecurrenceRule.Weekday>) {
+      for (index, weekday) in weekdays.enumerated() {
+        if index > 0 {
+          append(UInt8(ascii: ","))
+        }
+
+        switch weekday {
+        case let .every(localeWeekday):
+          append(localeWeekday)
+        case let .nth(ordinal, localeWeekday):
+          append(ordinal)
+          append(localeWeekday)
+        @unknown default: break // Safeguard against future unknown cases
+        }
+      }
+    }
+
+    // Helper to append a collection of `RecurrenceRule.Month` objects
+    func append(_ months: some Collection<RecurrenceRule.Month>) {
+      for (index, month) in months.enumerated() {
+        if index > 0 {
+          append(UInt8(ascii: ","))
+        }
+
+        append(month.index)
+      }
+    }
+
+    // Start formatting the RRULE. FREQ is mandatory.
+    append("FREQ=".utf8)
+
+    // Append the frequency part
+    switch rrule.frequency {
+    case .minutely: append("MINUTELY".utf8)
+    case .hourly:   append("HOURLY".utf8)
+    case .daily:    append("DAILY".utf8)
+    case .weekly:   append("WEEKLY".utf8)
+    case .monthly:  append("MONTHLY".utf8)
+    case .yearly:   append("YEARLY".utf8)
+    @unknown default: break // Safeguard against future unknown cases
+    }
+
+    // Append COUNT or UNTIL if present
+    if #available(macOS 15.2, iOS 18.2, tvOS 18.2, watchOS 11.2, *) {
+      if let count = rrule.end.occurrences, count > 0 {
+        append(";COUNT=".utf8)
+        append(count)
+      } else if let until = rrule.end.date {
+        append(";UNTIL=".utf8)
+        append(until)
+      }
+    }
+
+    // Append INTERVAL if greater than 1 (default is 1)
+    if rrule.interval > 1 {
+      append(";INTERVAL=".utf8)
+      append(rrule.interval)
+    }
+
+    // Append BYSECOND
+    if rrule.seconds.count > 0 {
+      append(";BYSECOND=".utf8)
+      append(rrule.seconds)
+    }
+
+    // Append BYMINUTE
+    if rrule.minutes.count > 0 {
+      append(";BYMINUTE=".utf8)
+      append(rrule.minutes)
+    }
+
+    // Append BYHOUR
+    if rrule.hours.count > 0 {
+      append(";BYHOUR=".utf8)
+      append(rrule.hours)
+    }
+
+    // Append BYDAY
+    if rrule.weekdays.count > 0 {
+      append(";BYDAY=".utf8)
+      append(rrule.weekdays)
+    }
+
+    // Append BYMONTHDAY
+    if rrule.daysOfTheMonth.count > 0 {
+      append(";BYMONTHDAY=".utf8)
+      append(rrule.daysOfTheMonth)
+    }
+
+    // Append BYYEARDAY
+    if rrule.daysOfTheYear.count > 0 {
+      append(";BYYEARDAY=".utf8)
+      append(rrule.daysOfTheYear)
+    }
+
+    // Append BYWEEKNO
+    if rrule.weeks.count > 0 {
+      append(";BYWEEKNO=".utf8)
+      append(rrule.weeks)
+    }
+
+    // Append BYMONTH
+    if rrule.months.count > 0 {
+      append(";BYMONTH=".utf8)
+      append(rrule.months)
+    }
+
+    // Append BYSETPOS
+    if rrule.setPositions.count > 0 {
+      append(";BYSETPOS=".utf8)
+      append(rrule.setPositions)
+    }
+
+    // Return the total number of bytes written
+    return index
+  }
+}
+
 // MARK: - ParseStrategy
 
 extension RecurrenceRuleRFC5545FormatStyle: ParseStrategy {
