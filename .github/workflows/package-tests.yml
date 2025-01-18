@@ -2,9 +2,14 @@ name: Swift Package Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - '.spi.yml'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   test:
