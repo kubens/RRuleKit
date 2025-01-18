@@ -224,7 +224,7 @@ extension RecurrenceRuleRFC5545FormatStyle: FormatStyle {
     }
 
     // Append COUNT or UNTIL if present
-    if #available(macOS 15.2, iOS 18.2, tvOS 18.2, watchOS 11.2, *) {
+    if #available(iOS 18.2, macCatalyst 18.2, macOS 15.2, tvOS 18.2, visionOS 2.2, watchOS 11.2, *) {
       if let count = rrule.end.occurrences, count > 0 {
         append(";COUNT=".utf8)
         append(count)
