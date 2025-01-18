@@ -203,6 +203,61 @@ struct RecurrenceRuleRFC5545ParseTests {
     }
 
     @Test(
+      "Parses all weekdays in BYDAY",
+      arguments: zip(
+        [
+          "FREQ=DAILY;BYDAY=MO",
+          "FREQ=DAILY;BYDAY=TU",
+          "FREQ=DAILY;BYDAY=WE",
+          "FREQ=DAILY;BYDAY=TH",
+          "FREQ=DAILY;BYDAY=FR",
+          "FREQ=DAILY;BYDAY=SA",
+          "FREQ=DAILY;BYDAY=SU",
+        ],
+        [
+          Calendar.RecurrenceRule.Weekday.every(.monday),
+          .every(.tuesday),
+          .every(.wednesday),
+          .every(.thursday),
+          .every(.friday),
+          .every(.saturday),
+          .every(.sunday),
+        ]
+      )
+    )
+    func allWeekdaysByDay(rfcString: String, expected: Calendar.RecurrenceRule.Weekday) throws {
+      let result = try parser.parse(rfcString)
+
+      #expect(result.weekdays == [expected])
+    }
+
+    @Test(
+      "Parses valid BYDAY values",
+      arguments: zip(
+        [
+          "FREQ=DAILY;BYDAY=MO,1WE",
+          "FREQ=DAILY;BYDAY=-1FR,MO"
+        ],
+        [
+          [Calendar.RecurrenceRule.Weekday.every(.monday), .nth(1, .wednesday)],
+          [.nth(-1, .friday), .every(.monday)]
+        ]
+      )
+    )
+    func parseByDay(byDayString: String, expected: [Calendar.RecurrenceRule.Weekday]) throws {
+      let result = try parser.parse(byDayString)
+
+      #expect(result.weekdays == expected)
+    }
+
+    @Test("Throws an error for invalid BYDAY values", arguments: ["FREQ=DAILY;BYDAY=BAR,1WE", "FREQ=DAILY;BYDAY=MO,1BAR"])
+    func invalidByDay(_ byDayString: String) throws {
+      #expect(throws: NSError.self) {
+        try parser.parse(byDayString)
+      }
+    }
+
+    @Test(
       "Parses valid BYMONTHDAY values",
       arguments: zip(
         ["BYMONTHDAY=1", "BYMONTHDAY=-31", "BYMONTHDAY=1,15,31"],

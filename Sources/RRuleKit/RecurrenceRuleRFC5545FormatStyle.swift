@@ -24,6 +24,7 @@ public struct RecurrenceRuleRFC5545FormatStyle: Sendable {
 }
 
 // MARK: - ParseStrategy
+
 extension RecurrenceRuleRFC5545FormatStyle: ParseStrategy {
 
   /// Parses an RFC 5545-compliant string into a `RecurrenceRule`.
