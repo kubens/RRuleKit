@@ -24,7 +24,7 @@ struct RecurrenceRuleRFC5545FormatTests {
   }
 
   @Suite("Rule Part Tests")
-  struct FrequencyRulePartTests {
+  struct RulePartTests {
 
     let calendar: Calendar
     let formatStyle: RecurrenceRuleRFC5545FormatStyle
@@ -179,8 +179,8 @@ struct RecurrenceRuleRFC5545FormatTests {
     }
 
     @Test("Format BYMONTHDAY Rule Part", arguments: zip(
-      [[], [1], [2, 3], []],
-      ["", "BYMONTHDAY=1", "BYMONTHDAY=2,3"]
+      [[], [1], [2, -3], []],
+      ["", "BYMONTHDAY=1", "BYMONTHDAY=2,-3"]
     ))
     func formatByMonthDayRulePart(byMonthDay: [Int], byMonthDayExpected: String) {
       let formatter = RecurrenceRuleRFC5545FormatStyle(calendar: calendar)

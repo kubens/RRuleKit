@@ -526,6 +526,7 @@ extension RecurrenceRuleRFC5545FormatStyle: ParseStrategy {
   ///   optionally preceded by a `-` for negative numbers.
   /// - Returns: An `Int` representing the parsed number, or `nil` if the slice contains invalid characters.
   private func parseAsInt(_ bufferSlice: Slice<UnsafeBufferPointer<UInt8>>, min: Int? = nil, max: Int? = nil) -> Int? {
+    guard bufferSlice.count > 0 else { return nil }
     var result: Int = 0
     var isNegative = false
     var index = bufferSlice.startIndex
